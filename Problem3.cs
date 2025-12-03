@@ -5,33 +5,27 @@ using System.Linq;
 
 public partial class Problem3 : Node2D
 {
+
+    private long joltSize = 12;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        var unparsed = LoadFromFile();
-        var parsed = ParseData(unparsed);
+        var unparsedData = LoadFromFile();
 
         long totalPower = 0;
 
-
-        foreach(var batteryString in parsed)
+        foreach(var batteryString in ParseData(unparsedData))
         {
             List<long> batteryList = new List<long>();
-            GD.Print("");
 
-            foreach(var battery in batteryString)
+            foreach(char battery in batteryString)
             {
-                // This is hilarious
-                if(battery > 47 && battery < 58)
-                {
-                    batteryList.Add(int.Parse(battery.ToString()));
-                }                
+                batteryList.Add(int.Parse(battery.ToString()));            
             }
 
             long[] bestNumbers = new long[12];
             int[] bestIndices = new int[12];
-
-            long joltSize = 12;
 
             for(int k = 0; k < joltSize; k++)
             {
@@ -39,7 +33,8 @@ public partial class Problem3 : Node2D
                 {
                     var checkedIndex = batteryList.FindIndex(0, x => x == i);
 
-                    // Never check the last in the list for the first number
+                    // Always leave room for more digits at the end,
+                    // a number with more digits will always be bigger than one with fewer!
                     if(batteryList.Contains(i) && checkedIndex < batteryList.Count()-(joltSize-1-k))
                     {
                         bestNumbers[k] = i;
@@ -48,20 +43,17 @@ public partial class Problem3 : Node2D
                     }
                 }
 
+                // Use the remaining part of the list
                 batteryList = batteryList.GetRange(bestIndices[k]+1,batteryList.Count()-bestIndices[k]-1);
             }
 
+            // Format the selected number correctly
             long addedPower = 0;
-
             for(int n = 0; n < joltSize; n++)
             {
                 addedPower += bestNumbers[n] * (long)Math.Pow(10,(joltSize-n-1));
             }
-
-            GD.Print(addedPower);
-
             totalPower += addedPower;
-
         }
 
         GD.Print(totalPower);
@@ -70,7 +62,7 @@ public partial class Problem3 : Node2D
 
     private string[] ParseData(string unparsed)
     {
-        var parsedData = unparsed.Split('\n');
+        var parsedData = unparsed.Split(System.Environment.NewLine);
         return parsedData;
     }
 
