@@ -43,7 +43,7 @@ public partial class Problem3 : Node2D
                     }
                 }
 
-                // Use the remaining part of the list
+                // Use the remaining part of the list for the next digit
                 batteryList = batteryList.GetRange(bestIndices[k]+1,batteryList.Count()-bestIndices[k]-1);
             }
 

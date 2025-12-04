@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Advent Of Code 2025"
-run/main_scene="uid://di4f1b5cckiei"
+run/main_scene="uid://bnjgd86odc1a8"
 config/features=PackedStringArray("4.5", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
