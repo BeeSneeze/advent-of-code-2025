@@ -10,6 +10,10 @@ public partial class Problem4 : Node2D
 
     private int maxRow = 140;
     private int maxColumn = 140;
+    
+            //int maxRow = parsedData[0].Length;
+        //int maxColumn = parsedData.Length;
+
 
     private int[] neighborIndicesX = {1,0,-1,1,-1, 1, 0,-1};
     private int[] neighborIndicesY = {1,1, 1,0, 0,-1,-1,-1};
@@ -21,8 +25,6 @@ public partial class Problem4 : Node2D
     {
         var parsedData = ParseData(LoadFromFile());
 
-        //int maxRow = parsedData[0].Length;
-        //int maxColumn = parsedData.Length;
 
         rollMatrix = new bool[maxRow,maxColumn];
         neighborNumMatrix = new int[maxRow,maxColumn];
@@ -40,19 +42,16 @@ public partial class Problem4 : Node2D
             searchedRow++;
         }
 
-
-
         CalculateNeighbors();
         GD.Print(totalAccessibleRolls);
 
         var res = FindViableRoll();
         var totalRemovals = 0;
 
-        while(res.Item1)
+        while(res.foundViable)
         {
             totalRemovals++;
-            //GD.Print("Removed: " + res.Item2.ToString() + ", " + res.Item3.ToString());
-            RemoveRoll(res.Item2,res.Item3);
+            RemoveRoll(res.foundX,res.foundY);
             res = FindViableRoll();
         }
 
@@ -80,7 +79,6 @@ public partial class Problem4 : Node2D
                 }
             }
         }
-
     }
 
     private (bool foundViable, int foundX, int foundY) FindViableRoll()
@@ -91,7 +89,6 @@ public partial class Problem4 : Node2D
             {
                 if(rollMatrix[x,y] && neighborNumMatrix[x,y] < 4)
                 {
-                    //GD.Print(neighborNumMatrix[x,y]);
                     return (true, x, y);
                 }
             }
