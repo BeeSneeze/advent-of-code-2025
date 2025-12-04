@@ -1,20 +1,31 @@
 using Godot;
 using System;
+using System.Threading;
 
 public partial class Problem4 : Node2D
 {
+
+    private int[,] neighborNumMatrix;
+    private bool[,] rollMatrix;
+
+    private int maxRow = 140;
+    private int maxColumn = 140;
+
+    private int[] neighborIndicesX = {1,0,-1,1,-1, 1, 0,-1};
+    private int[] neighborIndicesY = {1,1, 1,0, 0,-1,-1,-1};
+
+    private int totalAccessibleRolls = 0;
+
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         var parsedData = ParseData(LoadFromFile());
 
-        int maxRow = parsedData[0].Length;
-        int maxColumn = parsedData.Length;
+        //int maxRow = parsedData[0].Length;
+        //int maxColumn = parsedData.Length;
 
-        bool[,] rollMatrix = new bool[maxRow,maxColumn];
-        int[,] neighborNumMatrix = new int[maxRow,maxColumn];
-
-        int totalAccessibleRolls = 0;
+        rollMatrix = new bool[maxRow,maxColumn];
+        neighborNumMatrix = new int[maxRow,maxColumn];
 
         int searchedRow = 0;
         int searchedColumn = 0;
@@ -30,12 +41,68 @@ public partial class Problem4 : Node2D
         }
 
 
-        int[] neighborIndicesX = {1,0,-1,1,-1, 1, 0,-1};
-        int[] neighborIndicesY = {1,1, 1,0, 0,-1,-1,-1};
 
+        CalculateNeighbors();
+        GD.Print(totalAccessibleRolls);
+
+        var res = FindViableRoll();
+        var totalRemovals = 0;
+
+        while(res.Item1)
+        {
+            totalRemovals++;
+            //GD.Print("Removed: " + res.Item2.ToString() + ", " + res.Item3.ToString());
+            RemoveRoll(res.Item2,res.Item3);
+            res = FindViableRoll();
+        }
+
+        GD.Print(totalRemovals);
+
+        totalAccessibleRolls = 0;
+        CalculateNeighbors();
+        GD.Print(totalAccessibleRolls);
+    }
+
+    private void RemoveRoll(int a, int b)
+    {
+        rollMatrix[a,b] = false;
+
+        for(int k = 0; k < 8; k++)
+        {
+            var xOkay = neighborIndicesX[k] + a >= 0 && neighborIndicesX[k] + a < maxRow;
+            var yOkay = neighborIndicesY[k] + b >= 0 && neighborIndicesY[k] + b < maxRow;
+            if(xOkay && yOkay)
+            {
+                neighborNumMatrix[neighborIndicesX[k] + a,neighborIndicesY[k] + b] -= 1;
+                if(neighborNumMatrix[neighborIndicesX[k] + a,neighborIndicesY[k] + b] < 0)
+                {
+                    throw new Exception("TOO MANY NEIGHBOR REMOVALS!");
+                }
+            }
+        }
+
+    }
+
+    private (bool foundViable, int foundX, int foundY) FindViableRoll()
+    {
         for(int x = 0; x < maxRow; x++)
         {
-            GD.Print("");
+            for(int y = 0; y < maxColumn; y++)
+            {
+                if(rollMatrix[x,y] && neighborNumMatrix[x,y] < 4)
+                {
+                    //GD.Print(neighborNumMatrix[x,y]);
+                    return (true, x, y);
+                }
+            }
+        }
+        return (false, -1, -1);
+    }
+
+    private void CalculateNeighbors()
+    {
+        for(int x = 0; x < maxRow; x++)
+        {
             for(int y = 0; y < maxColumn; y++)
             {
                 int totalNeighbors = 0;
@@ -58,17 +125,9 @@ public partial class Problem4 : Node2D
                     totalAccessibleRolls++;
                 }
 
-                GD.Print(totalNeighbors);
                 neighborNumMatrix[x,y] = totalNeighbors;
             }
         }
-        
-        GD.Print(totalAccessibleRolls);
-    }
-
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
-    {
     }
 
     private string[] ParseData(string unparsed)
