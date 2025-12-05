@@ -21,26 +21,109 @@ public partial class Problem5 : Node2D
             rangeList.Add((long.Parse(nums[0]), long.Parse(nums[1])));
         }
 
-        var ingredients = ParseData(LoadFromFile("res://problem_5_ingredients.txt"));
+        var numOfRanges = rangeList.Count;
 
-        List<long> ingredientList = new List<long>();
 
-        foreach(var item in ingredients)
+        var foundViableMerge = true;
+
+        while(foundViableMerge)
         {
-            ingredientList.Add(long.Parse(item));
-        }
-
-        var totalFresh = 0;
-
-        foreach(var ingredient in ingredientList)
-        {
-            if(CheckExpired(ingredient))
+            (int,int) mergeIndices = new (-1,-1);
+            foundViableMerge = false;
+            for(int i = 0; i < numOfRanges; i++)
             {
-                totalFresh++;
+                for(int j = 0; j < numOfRanges; j++)
+                {
+                    if(i==j)
+                    {
+                        continue;
+                    }
+
+                    if(ShouldMerge(rangeList[i].Item1, rangeList[i].Item2, rangeList[j].Item1, rangeList[j].Item2))
+                    {
+                        foundViableMerge = true;
+                        mergeIndices = (i,j);
+                        break;
+                    }
+                }
+                if(foundViableMerge)
+                {
+                    break;
+                }
             }
+
+            if(foundViableMerge)
+            {
+                // PERFORM MERGE
+                GD.Print("DID A MERGE!");
+                numOfRanges--;
+                long leftNew = 0;
+                long rightNew = 0;
+                if(rangeList[mergeIndices.Item1].Item1 < rangeList[mergeIndices.Item2].Item1)
+                {
+                    leftNew = rangeList[mergeIndices.Item1].Item1;
+                }
+                else
+                {
+                    leftNew = rangeList[mergeIndices.Item2].Item1;
+                }
+
+                if(rangeList[mergeIndices.Item1].Item2 > rangeList[mergeIndices.Item2].Item2)
+                {
+                    rightNew = rangeList[mergeIndices.Item1].Item2;
+                }
+                else
+                {
+                    rightNew = rangeList[mergeIndices.Item2].Item2;
+                }
+
+                GD.Print(rangeList[mergeIndices.Item1]);
+                GD.Print(rangeList[mergeIndices.Item2]);
+
+                rangeList.Remove(rangeList[mergeIndices.Item1]);
+                rangeList.Remove(rangeList[mergeIndices.Item2-1]);
+                rangeList.Add((leftNew,rightNew));
+                GD.Print((leftNew,rightNew));                
+            }
+            
         }
 
-        GD.Print(totalFresh);
+        GD.Print(rangeList.Count);
+
+        long totalIDs = 0;
+
+        foreach(var freshRange in rangeList)
+        {
+            totalIDs += (freshRange.Item2 - freshRange.Item1) + 1;
+        }
+
+        GD.Print(totalIDs);
+
+
+    }
+
+    private bool ShouldMerge(long leftA, long rightA, long leftB, long rightB)
+    {
+        if(leftB <= leftA && rightA <= rightB)
+        {
+            return true;
+        }
+        if(leftA <= leftB && rightB <= rightA)
+        {
+            return true;
+        }
+
+        if(leftA <= leftB && leftB <= rightA && rightA <= rightB)
+        {
+            return true;
+        }
+
+        if(leftB <= leftA && leftA <= rightB && rightB <= rightA)
+        {
+            return true;
+        }
+
+        return false;
 
     }
 
