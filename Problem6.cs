@@ -11,11 +11,11 @@ public partial class Problem6 : Node2D
     public override void _Ready()
     {
         var worksheetRows = ParseData(LoadFromFile("res://problem_6.txt"));
-        var stringMatrix = worksheetRows[0..NUMBER_OF_ROWS]
-            .Select(x => x.ToArray()        // Turn strings into arrays of chars
-                .Select(c => c.ToString())  // Turn the chars into strings
-                .ToArray())                 // Make an array of strings
-            .ToArray();                     // Make an array of string arrays
+        var stringMatrix = worksheetRows[0..NUMBER_OF_ROWS] // A matrix of the numbers expressed as strings (placed in rows and columns)
+            .Select(x => x.ToArray()        
+                .Select(c => c.ToString())  
+                .ToArray())                 
+            .ToArray();                     
 
         List<List<long>> equationList = new List<List<long>>();
         List<long> savedNumbers = new List<long>();
@@ -28,12 +28,7 @@ public partial class Problem6 : Node2D
             }
             else
             {
-                var numberString = "";
-                for(int n = 0; n < NUMBER_OF_ROWS; n++)
-                {
-                    numberString += stringMatrix[n][k];
-                }
-                savedNumbers.Add(long.Parse(numberString));
+                savedNumbers.Add(long.Parse(stringMatrix.Aggregate("", (x,y) => x + y[k])));
             }
         }
         equationList.Add(savedNumbers); // Don't forget to add the leftmost calculation!
