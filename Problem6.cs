@@ -3,73 +3,71 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 public partial class Problem6 : Node2D
 {
-    // Called when the node enters the scene tree for the first time.
+    private const int NUMBER_OF_ROWS = 4;
     public override void _Ready()
     {
         var worksheetRows = ParseData(LoadFromFile("res://problem_6.txt"));
+        var stringMatrix = worksheetRows[0..NUMBER_OF_ROWS].Select(x=>x.ToArray().Select(c => c.ToString()).ToArray()).ToArray();
 
-
-        var numberRowStrings = worksheetRows[0..4];
-
-        var totalChars = numberRowStrings[0].Length;
-
-        List<long[]> longList = new List<long[]>();
-
-        long[] savedNumbers = new long[4];
-        int numberCount = 0;
-        for(int k = totalChars-1; k >= 0; k--)
+        List<List<long>> equationList = new List<List<long>>();
+        List<long> savedNumbers = new List<long>();
+        for(int k = stringMatrix[0].Length-1; k >= 0; k--)
         {
-            if(numberRowStrings[0][k] == ' ' && numberRowStrings[1][k] == ' ' && numberRowStrings[2][k] == ' ' && numberRowStrings[3][k] == ' ')
+            var emptyRow = true;
+            for(int n = 0; n < NUMBER_OF_ROWS; n++)
             {
-                numberCount = 0;
-                longList.Add(savedNumbers);
-                savedNumbers = new long[4];
+                if(stringMatrix[n][k] != " ")
+                {
+                    emptyRow = false;
+                    break;
+                }
+            }
+            if(emptyRow)
+            {
+                equationList.Add(savedNumbers);
+                savedNumbers = new List<long>();
             }
             else
             {
-                var numberString = numberRowStrings[0][k].ToString() + numberRowStrings[1][k].ToString() + numberRowStrings[2][k].ToString() + numberRowStrings[3][k].ToString();
-                savedNumbers[numberCount] = long.Parse(numberString);
-
-                numberCount++;
+                var numberString = "";
+                for(int n = 0; n < NUMBER_OF_ROWS; n++)
+                {
+                    numberString += stringMatrix[n][k];
+                }
+                savedNumbers.Add(long.Parse(numberString));
             }
         }
-        longList.Add(savedNumbers);
+        equationList.Add(savedNumbers); // Don't forget to add the leftmost calculation!
 
-        var operationString = worksheetRows.Last().Split(' ', StringSplitOptions.RemoveEmptyEntries).ToArray();
-        operationString = operationString.Reverse().ToArray();
-        int maxIndex = operationString.Length;
+        var operationString = worksheetRows.Last().Split(' ', StringSplitOptions.RemoveEmptyEntries).Reverse().ToArray();
         long totalValues = 0;
-        for(int i = 0; i < maxIndex; i++)
+        for(int i = 0; i < operationString.Length; i++)
         {
-            GD.Print(longList[i][0]);
-            GD.Print(longList[i][1]);
-            GD.Print(longList[i][2]);
-            GD.Print(longList[i][3]);
             switch(operationString[i])
             {
                 case "+":
-                    totalValues += longList[i][0] + longList[i][1] + longList[i][2] + longList[i][3];
+                    long addedNumber = 0;
+                    foreach(long num in equationList[i])
+                    {
+                        addedNumber += num;
+                    }
+                    totalValues += addedNumber;
                 break;
                 case "*":
-                    if(longList[i][0] == 0)
-                        longList[i][0] = 1;
-                    if(longList[i][1] == 0)
-                        longList[i][1] = 1;
-                    if(longList[i][2] == 0)
-                        longList[i][2] = 1;
-                    if(longList[i][3] == 0)
-                        longList[i][3] = 1;
-                    totalValues += longList[i][0] * longList[i][1] * longList[i][2] * longList[i][3];
+                    long multipliedNumber = 1;
+                    foreach(long num in equationList[i])
+                    {
+                        multipliedNumber *= num;
+                    }
+                    totalValues += multipliedNumber;
                 break;
             }
-
         }
-
         GD.Print(totalValues);
-        
     }
 
     // Called every frame. 'delta' is the elapsed time since the previous frame.
