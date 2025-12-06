@@ -11,7 +11,11 @@ public partial class Problem6 : Node2D
     public override void _Ready()
     {
         var worksheetRows = ParseData(LoadFromFile("res://problem_6.txt"));
-        var stringMatrix = worksheetRows[0..NUMBER_OF_ROWS].Select(x=>x.ToArray().Select(c => c.ToString()).ToArray()).ToArray();
+        var stringMatrix = worksheetRows[0..NUMBER_OF_ROWS]
+            .Select(x => x.ToArray()        // Turn strings into arrays of chars
+                .Select(c => c.ToString())  // Turn the chars into strings
+                .ToArray())                 // Make an array of strings
+            .ToArray();                     // Make an array of string arrays
 
         List<List<long>> equationList = new List<List<long>>();
         List<long> savedNumbers = new List<long>();
@@ -20,7 +24,7 @@ public partial class Problem6 : Node2D
             if(stringMatrix.All(x => x[k] == " "))
             {
                 equationList.Add(savedNumbers);
-                savedNumbers = new List<long>();
+                savedNumbers = new List<long>(); // Make sure it's a new copy, don't just clear the list
             }
             else
             {
@@ -41,20 +45,10 @@ public partial class Problem6 : Node2D
             switch(operationString[i])
             {
                 case "+":
-                    long addedNumber = 0;
-                    foreach(long num in equationList[i])
-                    {
-                        addedNumber += num;
-                    }
-                    totalValues += addedNumber;
+                    totalValues += equationList[i].Aggregate(0L, (x,y) => x + y);
                 break;
                 case "*":
-                    long multipliedNumber = 1;
-                    foreach(long num in equationList[i])
-                    {
-                        multipliedNumber *= num;
-                    }
-                    totalValues += multipliedNumber;
+                    totalValues += equationList[i].Aggregate(1L, (x,y) => x * y);
                 break;
             }
         }
