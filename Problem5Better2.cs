@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 
-public partial class Problem5Better : Node2D
+public partial class Problem5Better2 : Node2D
 {
-    private List<(long,long)> rangeList = new List<(long,long)>();
+    private List<(long left, long right)> rangeList = new List<(long,long)>();
 
     public override void _Ready()
     {
@@ -17,20 +17,26 @@ public partial class Problem5Better : Node2D
             rangeList.Add((long.Parse(nums[0]), long.Parse(nums[1])));
         }
 
+
+
         // Smush together all range edges into one list, and sort it
         List<(long number,bool isRightEnd)> allSmushed = new List<(long,bool)>();
+        Dictionary<long, int> stopGaps = new Dictionary<long, int>();
+
         foreach(var item in rangeList)
         {
-            allSmushed.Add((item.Item1, false));
-            allSmushed.Add((item.Item2, true));
+            stopGaps[item.left] += 1;
+            stopGaps[item.right] -= 1;
+            allSmushed.Add((item.left, false));
+            allSmushed.Add((item.right, true));
         }
         allSmushed = allSmushed.OrderBy(x => x.isRightEnd).ToList();
         allSmushed = allSmushed.OrderBy(x => x.number).ToList();
         
         // Depending on if it's a right or left edge, create new regions
+        long totalIDs = 0;
         long leftEdge = 0;
         var bracketCount = 0;
-        List<(long leftEdge, long rightEdge)> fixedRanges = new List<(long, long)>();
         foreach(var tuple in allSmushed)
         {
             if(tuple.isRightEnd)
@@ -38,7 +44,7 @@ public partial class Problem5Better : Node2D
                 // Right bracket
                 bracketCount--;
                 if(bracketCount == 0)
-                    fixedRanges.Add((leftEdge, tuple.number));
+                    totalIDs += tuple.number - leftEdge + 1;
             }
             else
             {
@@ -47,13 +53,6 @@ public partial class Problem5Better : Node2D
                     leftEdge = tuple.number;
                 bracketCount++;
             }
-        }
-
-        // Use the sorted regions to count valid ranges
-        long totalIDs = 0;
-        foreach(var freshRange in fixedRanges)
-        {
-            totalIDs += freshRange.rightEdge - freshRange.leftEdge + 1;
         }
 
         GD.Print(totalIDs);
