@@ -17,16 +17,7 @@ public partial class Problem6 : Node2D
         List<long> savedNumbers = new List<long>();
         for(int k = stringMatrix[0].Length-1; k >= 0; k--)
         {
-            var emptyRow = true;
-            for(int n = 0; n < NUMBER_OF_ROWS; n++)
-            {
-                if(stringMatrix[n][k] != " ")
-                {
-                    emptyRow = false;
-                    break;
-                }
-            }
-            if(emptyRow)
+            if(stringMatrix.All(x => x[k] == " "))
             {
                 equationList.Add(savedNumbers);
                 savedNumbers = new List<long>();
