@@ -12,7 +12,7 @@ public partial class Problem7 : GridContainer
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        var labRows = ParseData(LoadFromFile("res://problem_7.txt"));
+        var labRows = ParseData(LoadFromFile("res://Problem7/problem_7.txt"));
         List<long[]> countMatrix = new List<long[]>();
         var countRow = new long[labRows[0].Length]; // This counts the number of possible paths per square on the grid
 
@@ -73,7 +73,7 @@ public partial class Problem7 : GridContainer
 
     private void VisualizeAnswer(List<long[]> countMatrix)
     {
-        var scene = GD.Load<PackedScene>("res://RayGridSquare.tscn");
+        var scene = GD.Load<PackedScene>("res://Problem7/RayGridSquare.tscn");
 
         this.Columns = countMatrix.Count;
         long highestNumber = 0;

@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://itwx7lv7xarv"]
 
-[ext_resource type="Script" uid="uid://ddnspqaldi7ki" path="res://Problem7.cs" id="1_5orx8"]
+[ext_resource type="Script" uid="uid://ddnspqaldi7ki" path="res://Problem7/Problem7.cs" id="1_5orx8"]
 
 [node name="Problem7" type="GridContainer"]
 theme_override_constants/h_separation = 0

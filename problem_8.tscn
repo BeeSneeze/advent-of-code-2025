@@ -1,0 +1,12 @@
+[gd_scene load_steps=2 format=3 uid="uid://n37hnhyd2m6q"]
+
+[ext_resource type="Script" uid="uid://d01r0f8mef08p" path="res://Problem8.cs" id="1_jjub3"]
+
+[node name="Problem8" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_jjub3")
