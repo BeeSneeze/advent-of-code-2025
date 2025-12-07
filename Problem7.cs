@@ -24,53 +24,9 @@ public partial class Problem7 : GridContainer
 
         GD.Print("Total possible paths: " + countRow.Aggregate(0L, (x,y) => x+y).ToString());
         GD.Print("Total amount of splits: " + amountSplit);
-
-        VisualizeAnswer(countMatrix);
-
+        //VisualizeAnswer(countMatrix);
     }
-
-    private void VisualizeAnswer(List<long[]> countMatrix)
-    {
-        var scene = GD.Load<PackedScene>("res://RayGridSquare.tscn");
-
-        this.Columns = countMatrix.Count;
-        long highestNumber = 0;
-
-        foreach(var item in countMatrix)
-        {
-            if(item.Max() > highestNumber)
-            {
-                highestNumber = item.Max();
-            }
-        }
-
-        foreach(var column in countMatrix)
-        {
-            foreach(var number in column)
-            {
-                var newSquare = scene.Instantiate<ColorRect>();
-
-                if(number == 0)
-                {
-                    newSquare.Color = new Color(0.2f,0.2f,0.3f);
-                }
-                else if(number == highestNumber)
-                {
-                    newSquare.Color = new Color(0,1,0);
-                }
-                else
-                {
-                    newSquare.Color = new Color(0,1 + (float)Math.Log((0.001 + (float)number)/(float)highestNumber, 100000),0);
-                }
-
-                
-                AddChild(newSquare);
-                
-            }
-        }
-
-    }
-
+    
     private string GetNewRow(string oldRow, string newRow, long[] numberRow)
     {
         var outRow = ((string)newRow.Clone()).ToArray(); // Need a char array to write to
@@ -113,6 +69,48 @@ public partial class Problem7 : GridContainer
         }
 
         return new string(outRow);
+    }
+
+    private void VisualizeAnswer(List<long[]> countMatrix)
+    {
+        var scene = GD.Load<PackedScene>("res://RayGridSquare.tscn");
+
+        this.Columns = countMatrix.Count;
+        long highestNumber = 0;
+
+        foreach(var item in countMatrix)
+        {
+            if(item.Max() > highestNumber)
+            {
+                highestNumber = item.Max();
+            }
+        }
+
+        foreach(var column in countMatrix)
+        {
+            foreach(var number in column)
+            {
+                var newSquare = scene.Instantiate<ColorRect>();
+
+                if(number == 0)
+                {
+                    newSquare.Color = new Color(0.2f,0.2f,0.3f);
+                }
+                else if(number == highestNumber)
+                {
+                    newSquare.Color = new Color(0,1,0);
+                }
+                else
+                {
+                    newSquare.Color = new Color(0,1 + (float)Math.Log((0.001 + (float)number)/(float)highestNumber, 100000),0);
+                }
+
+                
+                AddChild(newSquare);
+                
+            }
+        }
+
     }
 
     private string[] ParseData(string unparsed)
