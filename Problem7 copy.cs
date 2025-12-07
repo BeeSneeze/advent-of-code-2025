@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Linq;
 
-public partial class Problem7 : Node2D
+public partial class Problem7Copy : Node2D
 {
 
     private int amountSplit = 0;
@@ -16,49 +16,33 @@ public partial class Problem7 : Node2D
 
         var startRow = labRows[0];
 
-        var countRow = new long[startRow.Length];
-
         for(int k = 1; k < labRows.Length; k++)
         {
-            labRows[k] = GetNewRow(labRows[k-1], labRows[k], countRow);
-            GD.Print(countRow);
-        }
-        
-        foreach(long num in countRow)
-        {
-            //GD.Print(num);
+            labRows[k] = GetNewRow(labRows[k-1], labRows[k]);
+            GD.Print(labRows[k]);
         }
 
-        var totalPaths = countRow.Aggregate(0L, (x,y) => x+y);
-
-        GD.Print(totalPaths);
+        GD.Print(amountSplit);
     }
 
-    private string GetNewRow(string oldRow, string newRow, long[] numberRow)
+    private string GetNewRow(string oldRow, string newRow)
     {
         var outRow = ((string)newRow.Clone()).ToArray();
-
-        long[] toBeAdded = new long[numberRow.Length];
 
         for(int i = 0; i < oldRow.Length; i++)
         {
             if(oldRow[i] == 'S' && newRow[i] == '.')
             {
                 outRow[i] = '|';
-                numberRow[i] += 1;
             }
 
-            if(oldRow[i] == '|')
+            if(oldRow[i] == '|' && newRow[i] == '.')
             {
-                if(newRow[i] == '.')
-                {
-                    outRow[i] = '|';
-                }
+                outRow[i] = '|';
             }
 
             if(oldRow[i] == '|' && newRow[i] == '^')
             {
-                toBeAdded[i] = -numberRow[i];
                 amountSplit++;
                 if(i > 0)
                 {
@@ -66,7 +50,6 @@ public partial class Problem7 : Node2D
                     {
                         outRow[i-1] = '|';
                     }
-                    toBeAdded[i-1] += numberRow[i];
                     
                 }
                 if(i + 1 < oldRow.Length)
@@ -75,14 +58,8 @@ public partial class Problem7 : Node2D
                     {
                         outRow[i+1] = '|';
                     }
-                    toBeAdded[i+1] += numberRow[i];
                 }
             }
-        }
-
-        for(int i = 0; i < oldRow.Length; i++)
-        {
-            numberRow[i] += toBeAdded[i];
         }
 
 
