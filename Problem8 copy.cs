@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
-public partial class Problem8 : Control
+public partial class Problem8Copy : Control
 {
 
     private float CalculateDistance(Vector3I a, Vector3I b)
@@ -17,6 +17,8 @@ public partial class Problem8 : Control
     {
         var data = ParseData(LoadFromFile("res://problem_8.txt"));
         var boxList = data.Select(x => new Vector3I(x.Split(',')[0].ToInt(),x.Split(',')[1].ToInt(),x.Split(',')[2].ToInt())).ToArray();
+        GD.Print(data.Length);
+        GD.Print(boxList.Length);
 
         // Perform the distance calculations only once
         var distanceMatrix = new float[boxList.Length,boxList.Length]; // There are (n)^2 possible distance comparisons
@@ -40,10 +42,7 @@ public partial class Problem8 : Control
             }
         }
 
-        var savedA = new Vector3I();
-        var savedB = new Vector3I();
-
-        var allowedConnections = 999;
+        var allowedConnections = 1000;
         while(allowedConnections > 0)
         {
             var res = GetLowestPair(distanceMatrix, boxList.Length);
@@ -53,7 +52,7 @@ public partial class Problem8 : Control
                 // Found a pair in the same bucket, mark as infinite distance, and try again
                 distanceMatrix[res.a,res.b] = 100000000000.0f;
                 distanceMatrix[res.b,res.a] = 100000000000.0f;
-                
+                allowedConnections--;
             }
             else
             {
@@ -69,17 +68,33 @@ public partial class Problem8 : Control
                 distanceMatrix[res.b,res.a] = 100000000000.0f;
                 
                 //GD.Print("CONNECTION MADE!");
-                savedA = boxList[res.a];
-                savedB = boxList[res.b];
+                //GD.Print(boxList[res.a]);
+                //GD.Print(boxList[res.b]);
                 allowedConnections--;
             }
         }
 
-        long answer = ((long)savedA.X) * ((long)savedB.X);
+        
 
-        GD.Print(savedA);
-        GD.Print(savedB);
+        var lengthList = connections.Select(x => x.Count).ToList();
+
+        lengthList.Sort();
+        lengthList.Reverse();
+
+        long answer = lengthList[0] * lengthList[1] * lengthList[2];
+        
+        GD.Print(lengthList.Count);
         GD.Print(answer);
+
+        foreach(var item in lengthList)
+        {
+            //GD.Print(item);
+        }
+
+        GD.Print(lengthList[0]);
+        GD.Print(lengthList[1]);
+        GD.Print(lengthList[2]);
+
 
     }
 
@@ -100,6 +115,8 @@ public partial class Problem8 : Control
                 }
             }
         }
+
+        GD.Print(lowestDistance);
 
         return (lowestX, lowestY);
     }
