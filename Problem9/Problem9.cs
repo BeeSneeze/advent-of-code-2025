@@ -6,7 +6,7 @@ public partial class Problem9 : Control
 {
     public override void _Ready()
     {
-        var redList = InitProblem("res://problem_9.txt");
+        var redList = InitProblem("res://Problem9/problem_9.txt");
         var dotList = new List<RedDot>();
         var turnAmount = 0;
 
