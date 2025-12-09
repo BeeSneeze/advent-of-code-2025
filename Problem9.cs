@@ -12,7 +12,7 @@ public partial class Problem9 : Control
 
         // The starting point wraps around to the end
         dotList.Add(new RedDot(redList[0].x, redList[0].y, FindOrientation(redList[redList.Count-1], redList[0]), FindOrientation(redList[0], redList[1])));
-        for(int k = 1; k < redList.Count-1; k++)
+        for(int k = 1; k < redList.Count; k++)
         {
             var current = redList[k];
             var next = redList[(k+1) % (redList.Count-1)];
@@ -43,11 +43,11 @@ public partial class Problem9 : Control
 
                 var turnsValid = ValidRectangleCorner(dotA, dotB, systemIsClockwise) && ValidRectangleCorner(dotB, dotA, systemIsClockwise);
 
-                if(turnsValid && NoOverlaps(dotA, dotB, dotList, systemIsClockwise))
+                if(turnsValid && NoOverlaps(dotA, dotB, dotList, systemIsClockwise) && NoIntersections(dotA, dotB, dotList))
                 {
                     var rectSize = (1 + Math.Abs(dotA.X - dotB.X)) * (1 + Math.Abs(dotA.Y - dotB.Y));
 
-                    if(rectSize > biggestRectangle && NoIntersections(dotA, dotB, dotList))
+                    if(rectSize > biggestRectangle)
                     {
                         biggestRectangle = rectSize;
                     }
@@ -85,7 +85,7 @@ public partial class Problem9 : Control
         DOWN
     }
     
-    private Orientation FindOrientation((long x, long y) start, (long x, long y) end)
+    private static Orientation FindOrientation((long x, long y) start, (long x, long y) end)
     {
         if(start.y < end.y && start.x == end.x)
         {
@@ -106,7 +106,7 @@ public partial class Problem9 : Control
     }
 
     // Checks if a value is inbetween two others
-    private bool IsBetween(long checkedValue, long sideA, long sideB)
+    private static bool IsBetween(long checkedValue, long sideA, long sideB)
     {
         if(sideA > sideB)
             return checkedValue < sideA && checkedValue > sideB;
@@ -116,7 +116,7 @@ public partial class Problem9 : Control
 
     // Checks that no red dots overlap the rectangle lines. If OUTER TURNS overlap, that means the valid area 
     // is turning away during the rectangle construction which means that the rectangle can't be valid. INNER TURNS are fine.
-    private bool NoOverlaps(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList, bool systemClockwise)
+    private static bool NoOverlaps(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList, bool systemClockwise)
     {
         foreach(var dot in dotList)
         {
@@ -133,7 +133,7 @@ public partial class Problem9 : Control
 
     // Makes sure that no lines for the valid area are intersecting the rectangle.
     // This function assumes that no points are overlapping the rectangle lines!!
-    private bool NoIntersections(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList)
+    private static bool NoIntersections(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList)
     {
         for(int k = 0; k < dotList.Count; k++)
         {
@@ -164,7 +164,7 @@ public partial class Problem9 : Control
     }
     
     // Checks if a rectangle construction would end up outside the valid area due to turn orientation
-    private bool ValidRectangleCorner(RedDot activeDot, RedDot comparisonDot, bool systemClockwise)
+    private static bool ValidRectangleCorner(RedDot activeDot, RedDot comparisonDot, bool systemClockwise)
     {
         if(activeDot.ClockWise() == systemClockwise) // If a dot is clockwise while the system is clockwise, only two edges are valid
         {
