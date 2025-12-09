@@ -4,18 +4,21 @@ using System.Collections.Generic;
 
 public partial class Problem9 : Control
 {
-    // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
         var redList = InitProblem("res://problem_9.txt");
         var dotList = new List<RedDot>();
         var turnAmount = 0;
 
+        // The starting point wraps around to the end
         dotList.Add(new RedDot(redList[0].x, redList[0].y, FindOrientation(redList[redList.Count-1], redList[0]), FindOrientation(redList[0], redList[1])));
         for(int k = 1; k < redList.Count-1; k++)
         {
-            var nextDot = new RedDot(redList[k].x, redList[k].y, FindOrientation(redList[k-1], redList[k]), FindOrientation(redList[k], redList[k+1]));
-            if(nextDot.ClockWise())
+            var current = redList[k];
+            var next = redList[(k+1) % (redList.Count-1)];
+            var currentDot = new RedDot(current.x, current.y, FindOrientation(redList[k-1], current), FindOrientation(current, next));
+
+            if(currentDot.ClockWise())
             {
                 turnAmount += 1;
             }
@@ -23,28 +26,28 @@ public partial class Problem9 : Control
             {
                 turnAmount -= 1;
             }
-            dotList.Add(nextDot);
+            dotList.Add(currentDot);
         }
-        dotList.Add(new RedDot(redList[redList.Count-1].x, redList[redList.Count-1].y, FindOrientation(redList[redList.Count-2], redList[redList.Count-1]), FindOrientation(redList[redList.Count-1], redList[0])));
-
+        
         // If we do more clockwise turns, that means clockwise turns are inside oriented
         var systemIsClockwise = turnAmount > 0;
 
         var biggestRectangle = 0L;        
         for(int a = 0; a < dotList.Count; a++)
         {
-            for(int b = 0; b < dotList.Count; b++)
+            for(int b = 0; b < a; b++)
             {
-                var rectSize = (1 + Math.Abs(dotList[a].X - dotList[b].X)) * (1 + Math.Abs(dotList[a].Y - dotList[b].Y));
-                var aDotValid = ValidRectangle(dotList[a], dotList[b], systemIsClockwise);
-                var bDotValid = ValidRectangle(dotList[b], dotList[a], systemIsClockwise);
-                var overlapValid = NoOverlaps(dotList[b], dotList[a], dotList, systemIsClockwise);
+                // The two corners of the rectangle
+                var dotA = dotList[a];
+                var dotB = dotList[b];
 
-                if(aDotValid && bDotValid && overlapValid)
+                var turnsValid = ValidRectangleCorner(dotA, dotB, systemIsClockwise) && ValidRectangleCorner(dotB, dotA, systemIsClockwise);
+
+                if(turnsValid && NoOverlaps(dotA, dotB, dotList, systemIsClockwise))
                 {
-                    var validIntersections = NoIntersections(dotList[b], dotList[a], dotList);
+                    var rectSize = (1 + Math.Abs(dotA.X - dotB.X)) * (1 + Math.Abs(dotA.Y - dotB.Y));
 
-                    if(rectSize > biggestRectangle && validIntersections)
+                    if(rectSize > biggestRectangle && NoIntersections(dotA, dotB, dotList))
                     {
                         biggestRectangle = rectSize;
                     }
@@ -55,122 +58,24 @@ public partial class Problem9 : Control
         GD.Print(biggestRectangle);
     }
 
-    private bool IsBetween(long checkedValue, long sideA, long sideB)
+    record struct RedDot(long X, long Y, Orientation InDir, Orientation OutDir)
     {
-        if(sideA > sideB)
-            return checkedValue < sideA && checkedValue > sideB;
-        
-        return checkedValue > sideA && checkedValue < sideB;
-    }
-
-    private bool NoIntersections(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList)
-    {
-        for(int k = 0; k < dotList.Count; k++)
+        public bool ClockWise()
         {
-            var current = dotList[k];
-            var next = dotList[(k+1) % (dotList.Count-1)];
+            if(InDir == Orientation.UP && OutDir == Orientation.RIGHT)
+                return true;
+            else if(InDir == Orientation.RIGHT && OutDir == Orientation.DOWN)
+                return true;
+            else if(InDir == Orientation.DOWN && OutDir == Orientation.LEFT)
+                return true;
+            else if(InDir == Orientation.LEFT && OutDir == Orientation.UP)
+                return true;
 
-            if(current.X - next.X == 0)
-            {
-                if(IsBetween(activeDot.Y, current.Y, next.Y) || IsBetween(comparisonDot.Y, current.Y, next.Y))
-                {
-                    if(IsBetween(current.X, activeDot.X, comparisonDot.X))
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                if(IsBetween(activeDot.X, current.X, next.X) || IsBetween(comparisonDot.X, current.X, next.X))
-                {
-                    if(IsBetween(current.Y, activeDot.Y, comparisonDot.Y))
-                    {
-                        return false;
-                    }
-                }
-            }
+            return false; // Counter Clockwise
         }
 
-        return true;
-    }
-
-    private bool NoOverlaps(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList, bool systemClockwise)
-    {
-        foreach(var dot in dotList)
-        {
-            if(dot.ClockWise() != systemClockwise)
-            {
-                continue;
-            }
-
-            if(dot.X == activeDot.X || dot.X == comparisonDot.X)
-            {
-                if(IsBetween(dot.Y, activeDot.Y, comparisonDot.Y))
-                {
-                    return false;
-                }
-            }
-            if(dot.Y == activeDot.Y || dot.Y == comparisonDot.Y)
-            {
-                if(IsBetween(dot.X, activeDot.X, comparisonDot.X))
-                {
-                    return false;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private bool ValidRectangle(RedDot activeDot, RedDot comparisonDot, bool systemClockwise)
-    {
-        if(activeDot.ClockWise() == systemClockwise)
-        {
-            // If a dot is clockwise while the system is clockwise, only two edges are valid
-            if(activeDot.X > comparisonDot.X)
-            {
-                // Active is to the right
-                if(activeDot.InDir == Orientation.LEFT || activeDot.OutDir == Orientation.RIGHT)
-                {
-                    return false;
-                }
-            }
-            if(activeDot.X < comparisonDot.X)
-            {
-                // Active is to the left
-                if(activeDot.InDir == Orientation.RIGHT || activeDot.OutDir == Orientation.LEFT)
-                {
-                    return false;
-                }
-            }
-
-            if(activeDot.Y > comparisonDot.Y)
-            {
-                // Active is above
-                if(activeDot.InDir == Orientation.DOWN || activeDot.OutDir == Orientation.UP)
-                {
-                    return false;
-                }
-            }
-            if(activeDot.Y < comparisonDot.Y)
-            {
-                // Active is below
-                if(activeDot.InDir == Orientation.UP || activeDot.OutDir == Orientation.DOWN)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        else
-        {
-            // If system and corner are different, that's an inward pointing turn, and all are valid
-            return true;
-        }
-        
-    }
+        public override string ToString() =>  X.ToString() + ", " + Y.ToString() + ": " + InDir.ToString() + OutDir.ToString();
+    };
 
     enum Orientation
     {
@@ -179,19 +84,18 @@ public partial class Problem9 : Control
         UP,
         DOWN
     }
-
-    private Orientation FindOrientation((long x, long y) a, (long x, long y) b)
+    
+    private Orientation FindOrientation((long x, long y) start, (long x, long y) end)
     {
-
-        if(a.y < b.y && a.x == b.x)
+        if(start.y < end.y && start.x == end.x)
         {
             return Orientation.UP;
         }
-        else if(a.y > b.y && a.x == b.x)
+        else if(start.y > end.y && start.x == end.x)
         {
             return Orientation.DOWN;
         }
-        else if(a.x < b.x)
+        else if(start.x < end.x)
         {
             return Orientation.RIGHT;
         }
@@ -201,7 +105,92 @@ public partial class Problem9 : Control
         }
     }
 
+    // Checks if a value is inbetween two others
+    private bool IsBetween(long checkedValue, long sideA, long sideB)
+    {
+        if(sideA > sideB)
+            return checkedValue < sideA && checkedValue > sideB;
+        
+        return checkedValue > sideA && checkedValue < sideB;
+    }
 
+    // Checks that no red dots overlap the rectangle lines. If OUTER TURNS overlap, that means the valid area 
+    // is turning away during the rectangle construction which means that the rectangle can't be valid. INNER TURNS are fine.
+    private bool NoOverlaps(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList, bool systemClockwise)
+    {
+        foreach(var dot in dotList)
+        {
+            if(dot.ClockWise() != systemClockwise) // Inward turn is always fine, ignore
+                continue;
+            if((dot.X == activeDot.X || dot.X == comparisonDot.X) && IsBetween(dot.Y, activeDot.Y, comparisonDot.Y))
+                return false;
+            if((dot.Y == activeDot.Y || dot.Y == comparisonDot.Y) && IsBetween(dot.X, activeDot.X, comparisonDot.X))
+                return false;
+        }
+
+        return true;
+    }
+
+    // Makes sure that no lines for the valid area are intersecting the rectangle.
+    // This function assumes that no points are overlapping the rectangle lines!!
+    private bool NoIntersections(RedDot activeDot, RedDot comparisonDot, List<RedDot> dotList)
+    {
+        for(int k = 0; k < dotList.Count; k++)
+        {
+            var current = dotList[k];
+            var next = dotList[(k+1) % (dotList.Count-1)];
+
+            if(current.X - next.X == 0)
+            {
+                // Check if an UP-DOWN oriented line is being intersected by the rectangle
+                if(IsBetween(activeDot.Y, current.Y, next.Y) || IsBetween(comparisonDot.Y, current.Y, next.Y))
+                {
+                    if(IsBetween(current.X, activeDot.X, comparisonDot.X))
+                        return false;
+                }
+            }
+            else
+            {
+                // Check if a RIGHT-LEFT oriented line is being intersected by the rectangle
+                if(IsBetween(activeDot.X, current.X, next.X) || IsBetween(comparisonDot.X, current.X, next.X))
+                {
+                    if(IsBetween(current.Y, activeDot.Y, comparisonDot.Y))
+                        return false;
+                }
+            }
+        }
+
+        return true;
+    }
+    
+    // Checks if a rectangle construction would end up outside the valid area due to turn orientation
+    private bool ValidRectangleCorner(RedDot activeDot, RedDot comparisonDot, bool systemClockwise)
+    {
+        if(activeDot.ClockWise() == systemClockwise) // If a dot is clockwise while the system is clockwise, only two edges are valid
+        {
+            if(activeDot.X > comparisonDot.X)
+            {
+                if(activeDot.InDir == Orientation.LEFT || activeDot.OutDir == Orientation.RIGHT)
+                    return false;
+            }
+            if(activeDot.X < comparisonDot.X)
+            {
+                if(activeDot.InDir == Orientation.RIGHT || activeDot.OutDir == Orientation.LEFT)
+                    return false;
+            }
+            if(activeDot.Y > comparisonDot.Y)
+            {
+                if(activeDot.InDir == Orientation.DOWN || activeDot.OutDir == Orientation.UP)
+                    return false;
+            }
+            if(activeDot.Y < comparisonDot.Y)
+            {
+                if(activeDot.InDir == Orientation.UP || activeDot.OutDir == Orientation.DOWN)
+                    return false;
+            }
+        }
+        return true; // If system and corner are different, that's an inward pointing turn, and all rectangles are valid
+    }
 
     private List<(long x, long y)> InitProblem(string path)
     {
@@ -243,38 +232,5 @@ public partial class Problem9 : Control
         string content = file.GetAsText();
         return content;
     }
-
-    
-    record struct RedDot(long X, long Y, Orientation InDir, Orientation OutDir)
-    {
-        public override string ToString()
-        {
-            return X.ToString() + ", " + Y.ToString() + ": " + InDir.ToString() + OutDir.ToString() + ", " + ClockWise();
-        }
-
-        public bool ClockWise()
-        {
-            if(InDir == Orientation.UP && OutDir == Orientation.RIGHT)
-            {
-                return true;
-            }
-            else if(InDir == Orientation.RIGHT && OutDir == Orientation.DOWN)
-            {
-                return true;
-            }
-            else if(InDir == Orientation.DOWN && OutDir == Orientation.LEFT)
-            {
-                return true;
-            }
-            else if(InDir == Orientation.LEFT && OutDir == Orientation.UP)
-            {
-                return true;
-            }
-            else
-            {
-                return false; // Counter Clockwise
-            }
-        }
-    };
 
 }
