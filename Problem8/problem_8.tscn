@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://n37hnhyd2m6q"]
 
-[ext_resource type="Script" uid="uid://d01r0f8mef08p" path="res://Problem8.cs" id="1_jjub3"]
+[ext_resource type="Script" uid="uid://bjfx4cv06n3xo" path="res://Problem8Copy.cs" id="1_jjub3"]
 
 [node name="Problem8" type="Control"]
 layout_mode = 3

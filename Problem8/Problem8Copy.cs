@@ -15,7 +15,7 @@ public partial class Problem8Copy : Control
     // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        var data = ParseData(LoadFromFile("res://problem_8.txt"));
+        var data = ParseData(LoadFromFile("res://problem_8_example.txt"));
         var boxList = data.Select(x => new Vector3I(x.Split(',')[0].ToInt(),x.Split(',')[1].ToInt(),x.Split(',')[2].ToInt())).ToArray();
         GD.Print(data.Length);
         GD.Print(boxList.Length);
@@ -42,7 +42,7 @@ public partial class Problem8Copy : Control
             }
         }
 
-        var allowedConnections = 1000;
+        var allowedConnections = 10;
         while(allowedConnections > 0)
         {
             var res = GetLowestPair(distanceMatrix, boxList.Length);
@@ -67,9 +67,9 @@ public partial class Problem8Copy : Control
                 distanceMatrix[res.a,res.b] = 100000000000.0f;
                 distanceMatrix[res.b,res.a] = 100000000000.0f;
                 
-                //GD.Print("CONNECTION MADE!");
-                //GD.Print(boxList[res.a]);
-                //GD.Print(boxList[res.b]);
+                GD.Print("CONNECTION MADE!");
+                GD.Print(boxList[res.a]);
+                GD.Print(boxList[res.b]);
                 allowedConnections--;
             }
         }
@@ -88,7 +88,7 @@ public partial class Problem8Copy : Control
 
         foreach(var item in lengthList)
         {
-            //GD.Print(item);
+            GD.Print(item);
         }
 
         GD.Print(lengthList[0]);
